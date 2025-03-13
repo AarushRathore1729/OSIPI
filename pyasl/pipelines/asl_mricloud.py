@@ -27,7 +27,6 @@ def img_rescale(source_path: str, target_path: str):
 
     rescaled_img.to_filename(target_path)
 
-
 def mricloud_rescale(data_descrip):
     print("MRICloud: Rescale ASL data...")
     for key, value in data_descrip["Images"].items():
@@ -40,7 +39,6 @@ def mricloud_rescale(data_descrip):
             m0_path = os.path.join(key, "perf", f"{value['M0']}.nii")
             m0_der_path = m0_path.replace("rawdata", "derivatives")
             img_rescale(m0_path, m0_der_path)
-
 
 def mricloud_calculate_diffmap(data_descrip: dict):
     print("MRICloud: Calculate difference volume...")

@@ -4,7 +4,7 @@ import struct
 import re
 import scipy.io
 import matplotlib.pyplot as plt
-from pyasl.asl_mricloud import mricloud_inbrain
+from .asl_mricloud import mricloud_inbrain
 
 
 def read_nmr_par(filename: str):

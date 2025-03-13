@@ -3,7 +3,7 @@ import numpy as np
 import nibabel as nib
 from nipype.interfaces import spm
 from pyasl.utils.utils import read_data_description, load_img
-
+from pyasl.preprocessing.realign import realign_data
 
 def img_reset_orientation(source_path: str, target_path: str):
     V = nib.load(source_path)
@@ -47,27 +47,27 @@ def asltbx_reset_orientation(data_descrip: dict):
             img_reset_orientation(anat_path, anat_der_path)
 
 
-def asltbx_realign(data_descrip: dict):
-    print("ASLtbx: Realign ASL data...")
-    for key, value in data_descrip["Images"].items():
-        key = key.replace("rawdata", "derivatives")
-        for asl_file in value["asl"]:
-            P = os.path.join(key, "perf", f"{asl_file}.nii")
+# def asltbx_realign(data_descrip: dict):
+#     print("ASLtbx: Realign ASL data...")
+#     for key, value in data_descrip["Images"].items():
+#         key = key.replace("rawdata", "derivatives")
+#         for asl_file in value["asl"]:
+#             P = os.path.join(key, "perf", f"{asl_file}.nii")
 
-            realign = spm.Realign()
-            realign.inputs.in_files = P
-            realign.inputs.quality = 0.9
-            realign.inputs.fwhm = 5
-            realign.inputs.register_to_mean = True  # realign to mean
-            realign.inputs.jobtype = "estwrite"
-            realign.inputs.interp = 1
-            realign.inputs.wrap = [0, 0, 0]
-            realign.inputs.write_mask = True
-            realign.inputs.write_which = [
-                2,
-                1,
-            ]
-            realign.run()
+#             realign = spm.Realign()
+#             realign.inputs.in_files = P
+#             realign.inputs.quality = 0.9
+#             realign.inputs.fwhm = 5
+#             realign.inputs.register_to_mean = True  # realign to mean
+#             realign.inputs.jobtype = "estwrite"
+#             realign.inputs.interp = 1
+#             realign.inputs.wrap = [0, 0, 0]
+#             realign.inputs.write_mask = True
+#             realign.inputs.write_which = [
+#                 2,
+#                 1,
+#             ]
+#             realign.run()
 
 
 def asltbx_coregister(data_descrip: dict):
@@ -480,7 +480,7 @@ def asltbx_pipeline(
     print("Process ASL images using ASLtbx...")
     data_descrip = read_data_description(root)
     asltbx_reset_orientation(data_descrip)
-    asltbx_realign(data_descrip)
+    realign_data(data_descrip,"asltbx")
     asltbx_coregister(data_descrip)
     asltbx_smooth(data_descrip, smooth_fwhm)
     asltbx_create_mask(data_descrip, mask_thres)

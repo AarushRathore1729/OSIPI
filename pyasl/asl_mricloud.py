@@ -8,6 +8,7 @@ from scipy.ndimage import binary_fill_holes, binary_erosion, binary_dilation, la
 from skimage.morphology import ball
 from scipy.optimize import curve_fit
 from pyasl.utils.utils import read_data_description, load_img
+from pyasl.preprocessing.realign import realign_data
 
 
 def img_rescale(source_path: str, target_path: str):
@@ -39,30 +40,6 @@ def mricloud_rescale(data_descrip):
             m0_path = os.path.join(key, "perf", f"{value['M0']}.nii")
             m0_der_path = m0_path.replace("rawdata", "derivatives")
             img_rescale(m0_path, m0_der_path)
-
-
-def mricloud_realign(data_descrip: dict):
-    print("MRICloud: Realign ASL data...")
-
-    for key, value in data_descrip["Images"].items():
-        key = key.replace("rawdata", "derivatives")
-        for asl_file in value["asl"]:
-            P = os.path.join(key, "perf", f"{asl_file}.nii")
-
-            realign = spm.Realign()
-            realign.inputs.in_files = P
-            realign.inputs.quality = 0.9  # SPM default
-            realign.inputs.fwhm = 5
-            realign.inputs.register_to_mean = False  # realign to the first timepoint
-            realign.inputs.jobtype = "estwrite"
-            realign.inputs.interp = 4  # SPM default
-            realign.inputs.wrap = [0, 0, 0]  # SPM default
-            realign.inputs.write_mask = True
-            realign.inputs.write_which = [
-                2,
-                1,
-            ]  # which_writerealign = 2, mean_writerealign = 1
-            realign.run()
 
 
 def mricloud_calculate_diffmap(data_descrip: dict):
@@ -1036,7 +1013,7 @@ def mricloud_pipeline(
     mricloud_rescale(data_descrip)
 
     if data_descrip["SingleDelay"]:
-        mricloud_realign(data_descrip)
+        realign_data(data_descrip,"mricloud")
         mricloud_calculate_diffmap(data_descrip)
         mricloud_calculate_M0(data_descrip, t1_tissue)
         mricloud_calculate_CBF(data_descrip, t1_blood, part_coef)

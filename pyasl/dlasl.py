@@ -8,15 +8,7 @@ from pyasl.utils.utils import read_data_description, load_img
 
 
 def dlasl_resample(v: nib.Nifti1Image, data: np.ndarray): 
-    """_summary_
-
-    Args:
-        v (nib.Nifti1Image): _description_
-        data (np.ndarray): _description_
-
-    Returns:
-        _type_: _description_
-    """
+    
     original_shape = data.shape
     original_affine = v.affine
 
